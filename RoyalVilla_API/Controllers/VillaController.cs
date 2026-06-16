@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RoyalVilla_API.Data;
 using RoyalVilla_API.Models;
+using RoyalVilla_API.Models.DTO;
 
 namespace RoyalVilla_API.Controllers
 {
@@ -46,15 +47,50 @@ namespace RoyalVilla_API.Controllers
                     $"An error occured while retrieving villa with ID {id}:{ex.Message}");
             }
         }
+        #region without Dto to create Villas
+        //[HttpPost]
+        //public async Task<ActionResult<Villa>> CreateVilla(Villa villa)
+        //{
+        //    try
+        //    {
+        //        if (villa==null)
+        //        {
+        //            return BadRequest("villa data is required");
+        //        }
+        //        await _db.Villa.AddAsync(villa);
+        //        await _db.SaveChangesAsync();
+        //        return Ok(villa);
+        //    }
+        //    catch (Exception ex)
+        //    {
+
+        //        return StatusCode(StatusCodes.Status500InternalServerError,
+        //            $"An error occured while creating the  villa:{ex.Message}");
+        //    }
+        //}
+        #endregion
+
+        #region using Dto to create Villas
         [HttpPost]
-        public async Task<ActionResult<Villa>> CreateVilla(Villa villa)
+        public async Task<ActionResult<Villa>> CreateVilla(VillaCreateDTO villaDTO)
         {
             try
             {
-                if (villa==null)
+                if (villaDTO == null)
                 {
                     return BadRequest("villa data is required");
                 }
+                //var villa = new Villa()  this one is old syntax
+                Villa villa = new() // new syntax both are correct
+                {
+                    Name = villaDTO.Name,
+                    Details = villaDTO.Details,
+                    Occupancy = villaDTO.Occupancy,
+                    ImageUrl = villaDTO.ImageUrl,
+                    Sqft = villaDTO.Sqft,
+                    Rate = villaDTO.Rate,
+                    CreatedDate = DateTime.Now
+                };
                 await _db.Villa.AddAsync(villa);
                 await _db.SaveChangesAsync();
                 return Ok(villa);
@@ -66,6 +102,7 @@ namespace RoyalVilla_API.Controllers
                     $"An error occured while creating the  villa:{ex.Message}");
             }
         }
+#endregion
         #region old code
         // [HttpGet("{id:int}/{name:string}")] //The constraint reference 'string' could not be resolved to a type. Register the constraint type with
         //[HttpGet("{id:int}/{name}")]
@@ -87,6 +124,6 @@ namespace RoyalVilla_API.Controllers
         //    return "Get Villa Id:" + id + ":" + name;
         //}
         #endregion
-       
+
     }
 }
