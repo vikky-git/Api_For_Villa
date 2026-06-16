@@ -1,5 +1,6 @@
-# Visual Studio temporary files
+# Visual Studio
 .vs/
+.vscode/
 
 # Build folders
 bin/
@@ -8,3 +9,5 @@ obj/
 # User files
 *.user
 *.suo
+# Nuget packages
+packages/
