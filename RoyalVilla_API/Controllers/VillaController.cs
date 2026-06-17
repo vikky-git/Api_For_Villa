@@ -100,7 +100,13 @@ namespace RoyalVilla_API.Controllers
                 Villa villa = _mapper.Map<Villa>(villaDTO);
                 await _db.Villa.AddAsync(villa);
                 await _db.SaveChangesAsync();
-                return Ok(villa);
+                //return Ok(villa);
+                /*instead of returning ok which return status code:200
+                 * but we want status code 201 so use Createdataction method
+                */
+                //return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id });// this one only return Id
+                return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id },villa);// this one return complete villa object
+
             }
             catch (Exception ex)
             {
