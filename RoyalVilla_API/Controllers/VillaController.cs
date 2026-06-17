@@ -166,7 +166,31 @@ namespace RoyalVilla_API.Controllers
             {
 
                 return StatusCode(StatusCodes.Status500InternalServerError,
-                    $"An error occured while creating the villa:{ex.Message}");
+                    $"An error occured while updating the villa:{ex.Message}");
+            }
+        }
+
+
+        [HttpDelete("{id:int}")]
+        public async Task<ActionResult<Villa>> DeleteVilla(int id)
+        {
+            try
+            {
+                
+                var existingvilla = await _db.Villa.FirstOrDefaultAsync(u => u.Id == id);
+                if (existingvilla == null)
+                {
+                    return NotFound($"Villa with ID {id} was not found");
+                }
+                _db.Villa.Remove(existingvilla);
+                await _db.SaveChangesAsync();
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+
+                return StatusCode(StatusCodes.Status500InternalServerError,
+                    $"An error occured while deleting the villa:{ex.Message}");
             }
         }
     }
