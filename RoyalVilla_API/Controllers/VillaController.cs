@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using RoyalVilla_API.Data;
 using RoyalVilla_API.Models;
@@ -13,9 +14,11 @@ namespace RoyalVilla_API.Controllers
     public class VillaController:ControllerBase
     {
         private readonly ApplicationDbContext _db;
-       public VillaController(ApplicationDbContext db)
+        private readonly IMapper _mapper; // here we inject the mapper
+       public VillaController(ApplicationDbContext db,IMapper mapper)
         {
             _db = db;
+            _mapper = mapper;
         }
         [HttpGet]       
         public async Task<ActionResult<IEnumerable<Villa>>> GetVillas()
@@ -81,16 +84,20 @@ namespace RoyalVilla_API.Controllers
                     return BadRequest("villa data is required");
                 }
                 //var villa = new Villa()  this one is old syntax
-                Villa villa = new() // new syntax both are correct
-                {
-                    Name = villaDTO.Name,
-                    Details = villaDTO.Details,
-                    Occupancy = villaDTO.Occupancy,
-                    ImageUrl = villaDTO.ImageUrl,
-                    Sqft = villaDTO.Sqft,
-                    Rate = villaDTO.Rate,
-                    CreatedDate = DateTime.Now
-                };
+
+                //Villa villa = new() // new syntax both are correct
+                //{
+                //    Name = villaDTO.Name,
+                //    Details = villaDTO.Details,
+                //    Occupancy = villaDTO.Occupancy,
+                //    ImageUrl = villaDTO.ImageUrl,
+                //    Sqft = villaDTO.Sqft,
+                //    Rate = villaDTO.Rate,
+                //    CreatedDate = DateTime.Now
+                //};
+
+                //below line of use automapper  so don't need to map each object
+                Villa villa = _mapper.Map<Villa>(villaDTO);
                 await _db.Villa.AddAsync(villa);
                 await _db.SaveChangesAsync();
                 return Ok(villa);
