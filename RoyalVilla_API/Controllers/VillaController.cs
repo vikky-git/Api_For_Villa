@@ -21,12 +21,16 @@ namespace RoyalVilla_API.Controllers
             _mapper = mapper;
         }
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Villa>>> GetVillas()
+        public async Task<ActionResult<IEnumerable<VillaDTO>>> GetVillas()
         {
-            return Ok(await _db.Villa.ToListAsync());
+            var villas = await _db.Villa.ToListAsync();
+
+            //return Ok(await _db.Villa.ToListAsync());
+            return Ok (_mapper.Map<List<VillaDTO>>(villas));
         }
+        
         [HttpGet("{id:int}")]
-        public async Task<ActionResult<Villa>> GetVillaById(int id)
+        public async Task<ActionResult<VillaDTO>> GetVillaById(int id)
         {
 
             try
@@ -41,7 +45,8 @@ namespace RoyalVilla_API.Controllers
                 {
                     return NotFound($"villa with id {id} was not found");
                 }
-                return Ok(villa);
+                // return Ok(villa);
+                return Ok(_mapper.Map<VillaDTO>(villa));
             }
             catch (Exception ex)
             {
@@ -75,7 +80,9 @@ namespace RoyalVilla_API.Controllers
 
         #region using Dto to create Villas
         [HttpPost]
-        public async Task<ActionResult<Villa>> CreateVilla(VillaCreateDTO villaDTO)
+        //HERE WE EXPOSE VILLA Entity/Class which is the bad practices
+        //So Make DTO CLASS -->VillaDTO
+        public async Task<ActionResult<VillaDTO>> CreateVilla(VillaCreateDTO villaDTO)
         {
             try
             {
@@ -96,6 +103,16 @@ namespace RoyalVilla_API.Controllers
                 //    CreatedDate = DateTime.Now
                 //};
 
+
+                //Here we need to Validate the Vilas for duplicate
+                var duplicatevilla = await _db.Villa.FirstOrDefaultAsync(u => u.Name.ToLower() == villaDTO.Name.ToLower());
+
+                if (duplicatevilla != null)
+                {
+                    return Conflict($"A Villa with the name '{villaDTO.Name}' already exists");// status code 409
+                }
+
+
                 //below line of use automapper  so don't need to map each object
                 Villa villa = _mapper.Map<Villa>(villaDTO);
                 await _db.Villa.AddAsync(villa);
@@ -105,7 +122,11 @@ namespace RoyalVilla_API.Controllers
                  * but we want status code 201 so use Createdataction method
                 */
                 //return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id });// this one only return Id
-                return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id }, villa);// this one return complete villa object
+
+
+                //return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id }, villa);// this one return complete villa object
+                return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id }, _mapper.Map<VillaDTO>(villa));
+
 
             }
             catch (Exception ex)
@@ -139,7 +160,7 @@ namespace RoyalVilla_API.Controllers
         #endregion
 
         [HttpPut("{id:int}")]
-        public async Task<ActionResult<Villa>>UpdateVilla(int id,VillaUpdateDTO villaDTO)
+        public async Task<ActionResult<VillaUpdateDTO>>UpdateVilla(int id,VillaUpdateDTO villaDTO)
         {
             try
             {
@@ -183,7 +204,7 @@ namespace RoyalVilla_API.Controllers
 
 
         [HttpDelete("{id:int}")]
-        public async Task<ActionResult<Villa>> DeleteVilla(int id)
+        public async Task<ActionResult> DeleteVilla(int id)
         {
             try
             {

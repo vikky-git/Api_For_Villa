@@ -19,6 +19,8 @@ builder.Services.AddAutoMapper(o =>
 {
     o.CreateMap<Villa,VillaCreateDTO>().ReverseMap(); //ReverseMap() is an AutoMapper method that creates mapping in both directions.
     o.CreateMap<Villa, VillaUpdateDTO>().ReverseMap();//use for Put
+    o.CreateMap<Villa, VillaDTO>().ReverseMap(); // we only expose VillaDTO not whole Entity
+
 }
 );
 var app = builder.Build();
