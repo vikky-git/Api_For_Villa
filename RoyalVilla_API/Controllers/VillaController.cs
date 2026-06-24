@@ -22,6 +22,8 @@ namespace RoyalVilla_API.Controllers
             _mapper = mapper;
         }
         [HttpGet]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>),StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status500InternalServerError)]
         public async Task<ActionResult<ApiResponse<IEnumerable<VillaDTO>>>> GetVillas()
         {
             var villas = await _db.Villa.ToListAsync();
@@ -32,6 +34,9 @@ namespace RoyalVilla_API.Controllers
         }
         
         [HttpGet("{id:int}")]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status404NotFound)]
         public async Task<ActionResult<ApiResponse<VillaDTO>>> GetVillaById(int id)
         {
 
@@ -119,6 +124,10 @@ namespace RoyalVilla_API.Controllers
         [HttpPost]
         //HERE WE EXPOSE VILLA Entity/Class which is the bad practices
         //So Make DTO CLASS -->VillaDTO
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status201Created)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult< ApiResponse<VillaDTO>>> CreateVilla(VillaCreateDTO villaDTO)
         {
             try
@@ -143,17 +152,13 @@ namespace RoyalVilla_API.Controllers
                 //};
                 #endregion
 
-
                 //Here we need to Validate the Vilas for duplicate
                 var duplicatevilla = await _db.Villa.FirstOrDefaultAsync(u => u.Name.ToLower() == villaDTO.Name.ToLower());
-
                 if (duplicatevilla != null)
                 {
                     return Conflict(ApiResponse<VillaDTO>.Conflict($"A Villa with the name '{villaDTO.Name}' already exists"));
                    // return Conflict($"A Villa with the name '{villaDTO.Name}' already exists");// status code 409
                 }
-
-
                 //below line of use automapper  so don't need to map each object
                 Villa villa = _mapper.Map<Villa>(villaDTO);
                 await _db.Villa.AddAsync(villa);
@@ -164,13 +169,11 @@ namespace RoyalVilla_API.Controllers
                 */
                 //return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id });// this one only return Id
 
-
                 //return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id }, villa);// this one return complete villa object
               //  return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id }, _mapper.Map<VillaDTO>(villa));
 
                 var response = ApiResponse<VillaDTO>.CreatedAt(_mapper.Map<VillaDTO>(villa),"Villa Created Successfully");
                 return CreatedAtAction(nameof(CreateVilla), new { id = villa.Id }, response);
-
 
             }
             catch (Exception ex)
@@ -206,6 +209,11 @@ namespace RoyalVilla_API.Controllers
         #endregion
 
         [HttpPut("{id:int}")]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status404NotFound)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status409Conflict)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<VillaDTO>>), StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<ApiResponse<VillaDTO>>>UpdateVilla(int id,VillaUpdateDTO villaDTO)
         {
             try
@@ -257,6 +265,10 @@ namespace RoyalVilla_API.Controllers
 
 
         [HttpDelete("{id:int}")]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<object>>), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<object>>), StatusCodes.Status500InternalServerError)]
+        [ProducesResponseType(typeof(ApiResponse<IEnumerable<object>>), StatusCodes.Status404NotFound)]
+        
         public async Task<ActionResult<ApiResponse<object>>> DeleteVilla(int id)
         {
             try
